@@ -1,0 +1,130 @@
+
+CREATE TABLE tbl_ITEM(
+    item_id int NOT NULL,
+	item_name varchar(20),
+    item_price int,
+    item_expDate date, 
+	
+	PRIMARY KEY (item_id)
+	
+   );
+
+CREATE TABLE tbl_Excecutive(
+    ex_id int NOT NULL,
+	ex_name varchar(20),
+    ex_contactNO int,
+    
+    PRIMARY KEY(ex_id)
+    );
+	
+	
+	
+CREATE TABLE tbl_Requisition_Detail(
+    req_id int NOT NULL,
+	req_creator_id int NOT NULL,
+    req_date date,
+    req_itemID int,
+    req_qtity int,
+    purpose varchar(20),
+    
+    PRIMARY KEY(req_id),
+    FOREIGN KEY(req_creator_id) REFERENCES tbl_excecutive(ex_id),
+    FOREIGN KEY (req_itemID) REFERENCES tbl_item(item_id)
+    
+   );
+   
+   
+CREATE TABLE tbl_tender(
+    tender_SLNo int NOT NULL,
+	tender_creator_id int NOT NULL,
+    tender_date date,
+    Project_Name varchar(40),
+    tender_location varchar(50),
+    tender_item_id int,
+    tender_item_qtity int,
+    tender_deadline int,
+       
+    PRIMARY KEY(tender_SLNo),
+    FOREIGN KEY(tender_creator_id) REFERENCES tbl_excecutive(ex_id),
+    FOREIGN KEY (tender_itemID) REFERENCES tbl_item(item_id)
+    
+   );
+   
+CREATE TABLE tbl_Supplier(
+    supp_id int NOT NULL,
+    supp_name varchar(40),
+	supp_contact int NOT NULL,
+    supp_address varchar(50),
+    PRIMARY KEY(supp_id)
+    
+   );
+   
+CREATE TABLE tbl_priced_bill(
+    pb_SLNo INT NOT NULL,
+    pb_supplier_id INT NOT NULL,
+    pb_tender_ref_id INT NOT NULL,
+    pb_item_id INT,
+    pb_price INT,
+    pb_total INT,
+    PRIMARY KEY(pb_SLNo),
+    FOREIGN KEY(pb_supplier_id) REFERENCES tbl_supplier(supp_id),
+    FOREIGN KEY(pb_item_id) REFERENCES tbl_item(item_id),
+    FOREIGN KEY(pb_tender_ref_id) REFERENCES tbl_tender(tender_SLNo)
+);
+
+
+
+CREATE TABLE tbl_order(
+    order_SLNo INT NOT NULL,
+    order_item_id INT NOT NULL,
+    order_item_name VARCHAR(20),
+    order_qtity INT NOT NULL,
+    order_date DATE,
+    order_deadline DATE,
+    order_supplier_id INT NOT NULL,
+    order_price_ref_id INT NOT NULL,
+    PRIMARY KEY(order_SLNo),
+    FOREIGN KEY(order_supplier_id) REFERENCES tbl_supplier(supp_id),
+    FOREIGN KEY(order_item_id) REFERENCES tbl_item(item_id),
+    FOREIGN KEY(order_price_ref_id) REFERENCES tbl_priced_bill(pb_SLNo)
+);
+
+ CREATE TABLE tbl_reciept(
+    r_SLNo INT NOT NULL,
+    r_order_ref_id INT NOT NULL,
+    r_date DATE,
+    r_price_ref INT,
+    r_total INT,
+    r_supplier_id INT NOT NULL,
+    PRIMARY KEY(r_SLNo),
+    FOREIGN KEY(r_supplier_id) REFERENCES tbl_supplier(supp_id),
+    FOREIGN KEY(r_order_ref_id) REFERENCES tbl_order(order_SLNo),
+    FOREIGN KEY(r_price_ref) REFERENCES tbl_priced_bill(pb_SLNo)
+);
+
+CREATE TABLE tbl_inventory(
+    in_id INT NOT NULL,
+    in_name varchar(40),
+    in_item_id INT NOT NULL,
+    in_balance int,
+    in_manager_id int,
+    
+    
+   
+    PRIMARY KEY(in_id),
+    FOREIGN KEY(in_item_id) REFERENCES tbl_item(item_id),
+    FOREIGN KEY(in_manager_id) REFERENCES tbl_excecutive(ex_id)
+    
+);
+
+
+// Updated the tble_item table
+// added 3 new foreign key
+ 
+ALTER TABLE tbl_item
+ADD COLUMN receipt_id INT,
+ADD COLUMN recieved_by_id INT,
+ADD COLUMN stored_in INT,
+ADD CONSTRAINT fk_receipt FOREIGN KEY (receipt_id) REFERENCES tbl_reciept(r_SLNo),
+ADD CONSTRAINT fk_received_by FOREIGN KEY (received_by_id) REFERENCES tbl_excecutive(ex_id),
+ADD CONSTRAINT fk_stored_in FOREIGN KEY (stored_in) REFERENCES tbl_inventory(in_id);
